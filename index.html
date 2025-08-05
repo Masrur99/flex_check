@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>FLEX Статус Регистрации</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f8f9fa;
+      text-align: center;
+      padding: 50px;
+    }
+    h1 {
+      color: #333;
+    }
+    #status {
+      font-size: 24px;
+      margin: 20px;
+    }
+    #counter {
+      margin-top: 10px;
+      color: #555;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 30px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🔍 Проверка регистрации на FLEX</h1>
+  <div id="status">Загрузка...</div>
+  <div id="counter">Проверок: 0</div>
+  <button onclick="checkStatus()">🔄 Проверить ещё раз</button>
+
+  <script>
+    const statusEl = document.getElementById("status");
+    const counterEl = document.getElementById("counter");
+
+    let counter = localStorage.getItem("flex_check_count") || 0;
+
+    function updateCounter() {
+      counter++;
+      localStorage.setItem("flex_check_count", counter);
+      counterEl.textContent = "Проверок: " + counter;
+    }
+
+    async function checkStatus() {
+      updateCounter();
+      statusEl.textContent = "⏳ Проверяю статус...";
+
+      try {
+        const proxyUrl = "https://api.codetabs.com/v1/proxy?quest=";
+        const targetUrl = "https://www.discoverflex.org";
+        const response = await fetch(proxyUrl + targetUrl);
+        const html = await response.text();
+
+        if (html.toLowerCase().includes("registration is open")) {
+          statusEl.innerHTML = "✅ Регистрация <b>ОТКРЫТА</b>!";
+        } else {
+          statusEl.innerHTML = "❌ Регистрация пока <b>закрыта</b>.";
+        }
+      } catch (error) {
+        statusEl.textContent = "⚠️ Ошибка при проверке.";
+        console.error(error);
+      }
+    }
+
+    // Автоматическая проверка при загрузке
+    checkStatus();
+  </script>
+
+</body>
+</html>
